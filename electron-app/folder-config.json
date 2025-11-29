@@ -1,0 +1,13 @@
+[
+  {
+    "name": "Project Images",
+    "path": "C:/Users/saffiyahmohammed/Documents/Voyis-CTRL-View/electron-app/images",
+    "fileTypes": ["jpg", "jpeg", "tif", "png"],
+    "recursive": true,
+    "insert": {
+      "enabled": true,
+      "table": "images",
+      "fields": ["filename", "filetype", "data", "uploadUser"]
+      }
+    }
+]
