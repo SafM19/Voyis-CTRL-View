@@ -42,40 +42,63 @@ async function getImageById(imageId) {
   }
 }
 
-/*async function insertFromConfig() {
+async function insertFromConfig() {
   try {
     const configPath = path.join(__dirname, "../../folder-config.json");
-    const config = JSON.parse(fs.readFileSync(configPath, "utf-8"));
+    const configFile = fs.readFileSync(configPath, "utf-8");
+    const folders = JSON.parse(configFile);
 
-    for (const folder of config) {
-      const { path: folderPath, fileTypes } = folder;
+    if (!Array.isArray(folders)) {
+      throw new Error("folder-config.json must be an array");
+    }
+
+    const insertedFiles = [];
+    const skippedFiles = [];
+
+    for (const folder of folders) {
+      const folderPath = folder.path;
+      const fileTypes = folder.fileTypes;
+
+      if (!folderPath || !fileTypes) continue;
 
       const files = fs.readdirSync(folderPath);
 
       for (const file of files) {
-        const ext = path.extname(file).toLowerCase().replace(".", "");
+        const ext = path.extname(file).slice(1).toLowerCase();
+        if (!fileTypes.includes(ext)) continue;
 
-        if (!fileTypes.includes(ext)) continue; // only jpg/tif/png
+        const exists = await client.query(
+          `SELECT COUNT(*) FROM images WHERE filename = $1`,
+          [file]
+        );
+
+        if (parseInt(exists.rows[0].count) > 0) {
+          skippedFiles.push(file);
+          continue;
+        }
 
         const fullPath = path.join(folderPath, file);
+        const buffer = fs.readFileSync(fullPath);
 
         await saveImage({
-          filePath: fullPath,
+          buffer,
           filename: file,
           filetype: ext,
           uploadUser: "batch",
           corrupt: 0
         });
 
-        console.log("Inserted:", file);
+        insertedFiles.push(file);
       }
     }
 
-    return { success: true };
+    return { success: true, inserted: insertedFiles, skipped: skippedFiles };
   } catch (err) {
-    console.error("Batch insert error:", err);
     throw err;
   }
-}*/
+}
 
-module.exports = { saveImage, getImageById};
+
+
+
+module.exports = { saveImage, getImageById, insertFromConfig};

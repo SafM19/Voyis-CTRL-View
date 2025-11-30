@@ -1,7 +1,7 @@
 [
   {
     "name": "Project Images",
-    "path": "C:/Users/saffiyahmohammed/Documents/Voyis-CTRL-View/electron-app/images",
+    "path": "C:/Users/saffiyahmohammed/Documents/Voyis/Voyis-CTRL-View/electron-app/images",
     "fileTypes": ["jpg", "jpeg", "tif", "png"],
     "recursive": true,
     "insert": {

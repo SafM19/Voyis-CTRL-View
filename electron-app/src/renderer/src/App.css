@@ -110,8 +110,19 @@
   width: 40vw;
 }
 
-.exit {
+.exit, .share {
   height: 20px;
   width: 20px;
   align-self: center;
+}
+
+.logs {
+  height: 15vh;
+  overflow-y: auto;
+  background: #f7f7f7;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 12px;
 }
