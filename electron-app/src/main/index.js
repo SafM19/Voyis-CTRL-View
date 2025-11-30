@@ -56,6 +56,7 @@ ipcMain.handle('run-batch-insert', async () => {
 });
 
 
+
 // Fetch all images
 ipcMain.handle('fetchAllImages', async () => {
   try {

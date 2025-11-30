@@ -10,7 +10,7 @@ const client = new Client({
   port: 5432,
   user: 'myuser',
   password: 'mypass',
-  database: 'testdb'
+  database: 'ctrl-view'
 });
 
 client.connect()

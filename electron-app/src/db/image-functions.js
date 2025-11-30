@@ -48,9 +48,7 @@ async function insertFromConfig() {
     const configFile = fs.readFileSync(configPath, "utf-8");
     const folders = JSON.parse(configFile);
 
-    if (!Array.isArray(folders)) {
-      throw new Error("folder-config.json must be an array");
-    }
+    if (!Array.isArray(folders)) throw new Error("folder-config.json must be an array");
 
     const insertedFiles = [];
     const skippedFiles = [];
@@ -58,7 +56,6 @@ async function insertFromConfig() {
     for (const folder of folders) {
       const folderPath = folder.path;
       const fileTypes = folder.fileTypes;
-
       if (!folderPath || !fileTypes) continue;
 
       const files = fs.readdirSync(folderPath);
@@ -67,38 +64,26 @@ async function insertFromConfig() {
         const ext = path.extname(file).slice(1).toLowerCase();
         if (!fileTypes.includes(ext)) continue;
 
-        const exists = await client.query(
-          `SELECT COUNT(*) FROM images WHERE filename = $1`,
-          [file]
-        );
-
+        // Check duplicate
+        const exists = await client.query(`SELECT COUNT(*) FROM images WHERE filename = $1`, [file]);
         if (parseInt(exists.rows[0].count) > 0) {
           skippedFiles.push(file);
           continue;
         }
 
-        const fullPath = path.join(folderPath, file);
-        const buffer = fs.readFileSync(fullPath);
-
-        await saveImage({
-          buffer,
-          filename: file,
-          filetype: ext,
-          uploadUser: "batch",
-          corrupt: 0
-        });
-
+        // Read file and insert
+        const buffer = fs.readFileSync(path.join(folderPath, file));
+        await saveImage({ buffer, filename: file, filetype: ext, uploadUser: "batch", corrupt: 0 });
         insertedFiles.push(file);
       }
     }
 
     return { success: true, inserted: insertedFiles, skipped: skippedFiles };
   } catch (err) {
+    console.error("Batch insert error:", err);
     throw err;
   }
 }
-
-
 
 
 module.exports = { saveImage, getImageById, insertFromConfig};
