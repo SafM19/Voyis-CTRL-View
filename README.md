@@ -88,4 +88,4 @@ A *Server Always Wins* approach is used:
 - Cons:
   - Local changes not yet synced to the server will be lost
 
-[Watch Demo](./demo/CTRL-View%20Demo.mp4)
+[Watch Demo](CTRL-View Demo.mp4)
