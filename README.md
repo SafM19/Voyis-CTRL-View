@@ -88,4 +88,8 @@ A *Server Always Wins* approach is used:
 - Cons:
   - Local changes not yet synced to the server will be lost
 
-[Watch Demo](CTRL-View Demo.mp4)
+## Demo
+
+You can watch a demo of CTRL-View using the video below:
+
+[Watch Demo Video](./CTRL-View%20Demo.mp4)
