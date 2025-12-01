@@ -36,7 +36,7 @@ const DisplayImages = forwardRef((props, ref) => {
   const translate = useRef({ x: 0, y: 0 });
   const scale = useRef(1);
 
-  // Convert base64 "data:..." URLs to Blob URL for display
+  // Convert base64 URLs to Blob URL for display
   const toURL = (dataUrl) => {
     const [meta, base64] = dataUrl.split(",");
     const mime = meta.split(":")[1].split(";")[0];
@@ -114,7 +114,7 @@ const DisplayImages = forwardRef((props, ref) => {
     });
   };
 
-  // ---------------------- PAN + ZOOM ----------------------
+  // PAN + ZOOM 
   const handleWheel = (e) => {
     if (!imgRef.current) return;
     e.preventDefault();
@@ -127,8 +127,8 @@ const DisplayImages = forwardRef((props, ref) => {
 
   const handleMouseDown = (e) => {
     if (!imgRef.current) return;
-
-    if (e.ctrlKey) { // cropping
+    // cropping
+    if (e.ctrlKey) { 
       const rect = imgRef.current.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
@@ -144,8 +144,8 @@ const DisplayImages = forwardRef((props, ref) => {
 
   const handleMouseMove = (e) => {
     if (!imgRef.current) return;
-
-    if (crop.active) { // cropping
+    // cropping
+    if (crop.active) { 
       const rect = imgRef.current.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
@@ -159,8 +159,8 @@ const DisplayImages = forwardRef((props, ref) => {
       }));
       return;
     }
-
-    if (isPanning.current) { // panning
+    // panning
+    if (isPanning.current) {
       translate.current = { x: e.clientX - panStart.current.x, y: e.clientY - panStart.current.y };
       imgRef.current.style.transform = `translate(${translate.current.x}px, ${translate.current.y}px) scale(${scale.current})`;
     }
@@ -199,25 +199,18 @@ const DisplayImages = forwardRef((props, ref) => {
     return canvas.toDataURL("image/png").replace("data:image/png;base64,", "");
   };
 
-  // ---------------------- RENDER ----------------------
+  //Render
   return (
-    <div style={{ padding: 20 }}>
-      {loading && <p>Loading images...</p>}
+    <div className="display-container">
+      {loading && <p className="loading">Loading images...</p>}
 
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
+      <div className="image-grid">
         {images.map((img) => (
           <img
             key={img.id}
-            src={img.url} // use blob URL for display
+            src={img.url}
             alt={img.filename}
-            style={{
-              width: 200,
-              height: 200,
-              objectFit: "cover",
-              border: selectedImage?.id === img.id ? "3px solid dodgerblue" : "1px solid #ccc",
-              borderRadius: 4,
-              cursor: "pointer",
-            }}
+            className={`image-thumb ${selectedImage?.id === img.id ? "selected" : ""}`}
             onClick={() => {
               setSelectedImage(img);
               onImageSelect?.(img);
@@ -230,46 +223,31 @@ const DisplayImages = forwardRef((props, ref) => {
       {fullsize && (
         <div
           ref={containerRef}
+          className="fullscreen-overlay"
           onClick={closeFullsize}
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100vw",
-            height: "100vh",
-            background: "rgba(0,0,0,0.85)",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            zIndex: 9999,
-          }}
         >
-          <Button title="Exit" imgSrc={reject} onClick={closeFullsize} style={{ position: "absolute", top: 20, right: 20 }} />
-          <div onClick={(e) => e.stopPropagation()} style={{ position: "relative" }}>
+          <div className="fullscreen-wrapper" onClick={(e) => e.stopPropagation()}>
             <img
               ref={imgRef}
               src={fullsize}
               draggable={false}
-              style={{ maxWidth: "90vw", maxHeight: "90vh", cursor: "grab", userSelect: "none" }}
+              className="fullscreen-image"
               onWheel={handleWheel}
               onMouseDown={handleMouseDown}
               onMouseMove={handleMouseMove}
               onMouseUp={handleMouseUp}
             />
+
             {(crop.active || crop.w > 0) && (
               <div
+                className="crop-overlay"
                 style={{
-                  position: "absolute",
-                  border: "2px dashed #00ff00",
-                  backgroundColor: "rgba(0,255,0,0.2)",
                   left: crop.x,
                   top: crop.y,
                   width: crop.w,
                   height: crop.h,
-                  pointerEvents: "none",
-                  zIndex: 2000,
                 }}
-              />
+              ></div>
             )}
           </div>
         </div>

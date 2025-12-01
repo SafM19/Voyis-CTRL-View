@@ -49,6 +49,8 @@ function App() {
   
   const toggleVisibility = () => setIsVisible(!isVisible);
 
+
+// Export images
   const handleShareClick = async () => {
     if (!displayRef.current?.getCurrentImages) {
       addLog("Export not available");
@@ -74,10 +76,53 @@ function App() {
   };
 
  const handleBatchInsert = async () => {
-  const result = await window.electronAPI.runBatchInsert();
+  try {
+    addLog("Starting batch insert...");
+    const result = await window.electronAPI.runBatchInsert();
 
-  if (!result.success) {
-    addLog("Batch Insert failed.");
+    result.inserted.forEach(f => addLog(`Inserted: ${f}`));
+    result.skipped.forEach(f => addLog(`Skipped duplicate: ${f}`));
+
+    // Display stats
+    const { totalFiles, totalSize, corruptCount } = result.stats || {};
+    addLog(`Total files processed: ${totalFiles}`);
+    addLog(`Total file size: ${totalSize} bytes`);
+    addLog(`Corrupted files: ${corruptCount}`);
+
+    addLog("Batch insert completed.");
+  } catch (err) {
+    addLog(`Batch insert failed: ${err.message}`);
+  }
+};
+
+
+//control panel
+const handleSyncAndReload = async () => {
+  try {
+    addLog("Starting sync...");
+
+    const syncResult = await window.electronAPI.syncFromServer();
+
+    addLog(`Sync completed: ${syncResult.status}`);
+
+    if (syncResult.updated) {
+      syncResult.updated.forEach(f =>
+        addLog(`Updated from server: ${f}`)
+      );
+    }
+
+    if (syncResult.added) {
+      syncResult.added.forEach(f =>
+        addLog(`New server file: ${f}`)
+      );
+    }
+
+    addLog("Reloading images...");
+    displayRef.current?.reload(filterOpt);
+
+    addLog("Reload complete.");
+  } catch (err) {
+    addLog(`Sync or reload failed: ${err.message}`);
   }
 };
 
@@ -109,25 +154,23 @@ function App() {
         </div>
 
         <div className="body">
-          <Button
-            title="Filter"
-            imgClassName="filter"
-            imgSrc={filter}
-            onClick={toggleVisibility}
-          />
-          <Dropdown
-            isVisible={isVisible}
-            onSelect={handleFilterSelect}
-            selected={filterOpt}
-          />
+          <div className="filter-dropdown">
+            <Button
+              title="Filter"
+              imgClassName="filter"
+              imgSrc={filter}
+            />
+            <Dropdown
+              isVisible={true}  // we'll control visibility via CSS
+              onSelect={handleFilterSelect}
+              selected={filterOpt}
+            />
+          </div>
           <Button
             title="Reload"
             imgClassName="reload"
             imgSrc={reload}
-            onClick={() => {
-              displayRef.current?.reload(filterOpt);
-              addLog("Reloaded images");
-            }}
+            onClick={handleSyncAndReload}
           />
           <Button
             title="Share"

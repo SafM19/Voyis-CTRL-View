@@ -19,7 +19,7 @@ function logToRenderer(message) {
   });
 }
 
-// IPC Handlers //
+// IPC Handlers 
 
 // Check for duplicate by filename
 ipcMain.handle('check-duplicate', async (event, filename) => {
@@ -38,24 +38,12 @@ ipcMain.handle('check-duplicate', async (event, filename) => {
 // Run batch insert from folder config
 ipcMain.handle('run-batch-insert', async () => {
   try {
-    logToRenderer("Starting batch insert...");
-
     const result = await insertFromConfig();
-
-    result.inserted.forEach(f => logToRenderer(`Inserted: ${f}`));
-    result.skipped.forEach(f => logToRenderer(`Skipped duplicate: ${f}`));
-
-    logToRenderer("Batch insert completed.");
-
     return result;
-
   } catch (err) {
-    logToRenderer(`Batch insert failed: ${err.message}`);
     return { success: false, error: err.message };
   }
 });
-
-
 
 // Fetch all images
 ipcMain.handle('fetchAllImages', async () => {
@@ -156,7 +144,7 @@ ipcMain.handle("export:chooseFolder", async () => {
   return result.filePaths[0];
 });
 
-// Export images that are displayed on screen
+// Export images 
 ipcMain.handle("export:images", async (event, { images, folder }) => {
   try {
     if (!folder) throw new Error("No folder selected");
@@ -194,7 +182,84 @@ ipcMain.handle("export:images", async (event, { images, folder }) => {
   }
 });
 
+// Sync
+// Read local images from DB
+async function getLocalImages() {
+  const res = await client.query("SELECT filename, updated_at FROM images");
+  return res.rows;
+}
 
+// Save image locally in DB
+async function saveLocalImage(img, exists) {
+  const buffer = img.data;
+
+  if (exists) {
+    await updateImage({
+      buffer,
+      filename: img.filename,
+      filetype: path.extname(img.filename).slice(1),
+      uploadUser: "server-sync",
+      corrupt: 0,
+      updatedAt: img.updated_at
+    });
+  } else {
+    await saveImage({
+      buffer,
+      filename: img.filename,
+      filetype: path.extname(img.filename).slice(1),
+      uploadUser: "server-sync",
+      corrupt: 0,
+      updatedAt: img.updated_at
+    });
+  }
+}
+
+
+// Sync handler
+ipcMain.handle("sync-from-server", async () => {
+  try {
+    const serverRes = await client.query(
+      "SELECT filename, data, updated_at FROM images"
+    );
+    const serverImages = serverRes.rows;
+
+    const localImages = await getLocalImages();
+
+    let addedFiles = [];
+    let updatedFiles = [];
+
+    for (const sImg of serverImages) {
+      const existing = localImages.find(l => l.filename === sImg.filename);
+
+      if (!existing) {
+        await saveLocalImage(sImg, false);
+        addedFiles.push(sImg.filename);
+      } else {
+        const serverTS = new Date(sImg.updated_at);
+        const localTS = new Date(existing.updated_at);
+
+        if (serverTS > localTS) {
+          await saveLocalImage(sImg, true);
+          updatedFiles.push(sImg.filename);
+        }
+      }
+    }
+
+    return {
+      status: "ok",
+      strategy: "Server Always Wins",
+      added: addedFiles,
+      updated: updatedFiles
+    };
+
+  } catch (err) {
+    console.error("Sync error:", err);
+    return {
+      status: "error",
+      error: err.message
+    };
+  }
+});
 
 // Create window and point to react app
 const createWindow = () => {
@@ -209,7 +274,7 @@ const createWindow = () => {
     }
   });
 
-  win.loadURL('http://localhost:3000'); // React dev server or local file
+  win.loadURL('http://localhost:3000'); 
 };
 
 // App events

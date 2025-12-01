@@ -28,5 +28,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   onMainLog: (callback) => ipcRenderer.on('log-from-main', (event, message) => callback(message)),
 
   // Checking for duplicates
-  checkDuplicate: (filename) => ipcRenderer.invoke('check-duplicate', filename)
+  checkDuplicate: (filename) => ipcRenderer.invoke('check-duplicate', filename),
+
+  syncFromServer: () => ipcRenderer.invoke("sync-from-server")
 });
