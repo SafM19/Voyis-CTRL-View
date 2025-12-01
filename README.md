@@ -87,3 +87,5 @@ A *Server Always Wins* approach is used:
   - Users don't need to resolve conflicts
 - Cons:
   - Local changes not yet synced to the server will be lost
+
+[Watch Demo](./demo/CTRL-View%20Demo.mp4)
