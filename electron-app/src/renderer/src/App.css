@@ -1,3 +1,8 @@
+* {
+  font-family: 'Inter', sans-serif;
+  box-sizing: border-box;
+}
+
 .layout {
   width: 100%;
 
@@ -12,7 +17,6 @@
   border-bottom: 1px solid #000000;
   border-left: 1px solid #000000;
   border-right: 1px solid #000000;
-  /*background-color: rgb(30, 216, 223);*/
   height: 70vh;
 }
 
@@ -46,8 +50,8 @@
   display: flex;
   height: 30px;
   width: 30px;
-  background-color: #fbeee0;
-  border: 2px solid #422800;
+  background-color: #f0d2b2;
+  border: 2px solid #da8a12;
   border-radius: 10px;
   justify-content: center;
   align-items: center;
@@ -71,8 +75,8 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: #fbeee0;
-    border: 2px solid #422800;
+    background-color: #f0d2b2;
+    border: 2px solid #da8a12;
     border-radius: 10px;
 }
 
