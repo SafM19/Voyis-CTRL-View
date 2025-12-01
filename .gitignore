@@ -1,0 +1,22 @@
+# Node modules
+node_modules/
+
+# React app build/output folder
+react-app/
+
+# Output folder
+out/
+
+# Optional: OS / IDE files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Optional: logs
+*.log
+
+# Optional: env files
+.env
+.env.local
+.env.*.local
